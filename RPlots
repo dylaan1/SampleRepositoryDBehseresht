@@ -1,1 +1,26 @@
+###     107th Cohesion Plot and T-Test     ###
+HS107$Cohesion<-abs(HS107$yea-HS107$nay)/(HS107$yea+HS107$nay)
+plot(HS107$date2,HS107$Cohesion,pch=19,cex=.5,
+    main="Cohesion Scores by Day - 107th Congress",
+    xlab="Time", ylab="Cohesion",
+    col="black")
+abline(v=as.Date("2001-09-11"),lwd=2)
+HS107PreTreat<-subset(HS107,HS107$date2<as.Date("2001-09-11"))
+Model1<-lm(Cohesion~date2,data=HS107PreTreat)
+Yhat1<-predict.lm(Model1,interval="confidence")
+for(i in 1:(length(Yhat1)-1)){
+  lines(HS107PreTreat$date2[c(i,i+1)],Yhat1[c(i,i+1),2],col=2,lwd=3)
+  lines(HS107PreTreat$date2[c(i,i+1)],Yhat1[c(i,i+1),1],lwd=3)
+  lines(HS107PreTreat$date2[c(i,i+1)],Yhat1[c(i,i+1),3],col=2,lwd=3)
+}
+HS107PostTreat<-subset(HS107,HS107$date2>as.Date("2001-09-11"))
+Model2<-lm(Cohesion~date2,data=HS107PostTreat)
+Yhat2<-predict.lm(Model2,interval="confidence")
+for(i in 1:(length(Yhat2)-1)){
+  lines(HS107PostTreat$date2[c(i,i+1)],Yhat2[c(i,i+1),2],col=2,lwd=3)
+  lines(HS107PostTreat$date2[c(i,i+1)],Yhat2[c(i,i+1),1],lwd=3)
+  lines(HS107PostTreat$date2[c(i,i+1)],Yhat2[c(i,i+1),3],col=2,lwd=3)
+}
+HS107$T<-HS107$date2>as.Date("2001-09-11")
+t.test(HS107$Cohesion~HS107$T)
 
