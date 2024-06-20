@@ -1,7 +1,4 @@
-Standings Calculation
-
-import pandas as pd
-from sys_databases import DatabaseManager
+## Standings Calculation ##
 
 
 def calculate_standings():
@@ -50,9 +47,9 @@ def view_standings():
         print(df)
 
 #--------------------------------------------------------------------------------------------#
-External Database Connection
 
-import sqlite3
+## External Database Connection ##
+
 
 
 def connect_db(db_name='generic.db'):
