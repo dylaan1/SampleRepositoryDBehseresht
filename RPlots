@@ -24,3 +24,31 @@ for(i in 1:(length(Yhat2)-1)){
 HS107$T<-HS107$date2>as.Date("2001-09-11")
 t.test(HS107$Cohesion~HS107$T)
 
+#-----------------------------------------------------------------------------------#
+
+###  Total Margins Before   ###
+hist(HS116$Margin[HS116$T==0],
+      main="Roll Call Margins Before COVID-19",
+      xlab="Margin", ylab="Frequency",
+      border="black",
+      col="dodgerblue2",
+      xlim=c(0,450), ylim=c(0,650),
+      xaxp=c(0,450,9), yaxp=c(0,650,13))
+
+###  Total Margins After   ###
+hist(HS116$Margin[HS116$T==1],
+      main="Roll Call Margins After COVID-19",
+      xlab="Margin", ylab="Frequency",
+      border="black",
+      col="tomato3",
+      xlim=c(0,450), ylim=c(0,150),
+      xaxp=c(0,450,9), yaxp=c(0,150,5))
+
+###   116th House Entire Term   ###
+hist(HS116$Margin[HS116$chamber=="House"],
+     main="116th House Roll Call Margins",
+     xlab="Margin", ylab="Frequency",
+     border="black",
+     col="springgreen3",
+     xlim=c(0,450), ylim=c(0,400),
+     xaxp=c(0,450,9), yaxp=c(0,400,8))
