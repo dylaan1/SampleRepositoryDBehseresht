@@ -1,1 +1,51 @@
+Standings Calculation
+
+import pandas as pd
+from sys_databases import DatabaseManager
+
+
+def calculate_standings():
+    with DatabaseManager('generic.db') as cursor:
+        cursor.execute('SELECT * FROM standings')
+        matches = cursor.fetchall()
+        df = pd.DataFrame(matches)
+        standings = pd.DataFrame(columns=['Team', 'GP', 'W', 'L', 'Win %',
+                                          'GF', 'GA', 'GD'])
+        standings.set_index('Team', inplace=True)
+        for index, row in df.iterrows():
+            update_standings(standings,
+                             row['away_team'], row['away_score'],
+                             row['home_score'], row['away_score'] >
+                             row['home_score'])
+            update_standings(standings,
+                             row['home_team'], row['home_score'],
+                             row['away_score'], row['home_score'] >
+                             row['away_score'])
+        standings.reset_index(inplace=True)
+        standings.to_sql('standings', con=cursor.connection,
+                         if_exists='replace', index=False)
+
+
+def update_standings(standings, team, goals_for, goals_against, win):
+    if team not in standings.index:
+        standings.loc[team] = [0, 0, 0, 0, 0, 0, 0]
+    team_standings = standings.loc[team]
+    team_standings['GP'] += 1
+    team_standings['W'] += 1 if win else 0
+    team_standings['L'] += 0 if win else 1
+    team_standings['Win %'] = team_standings['W'] / team_standings['GP']
+    team_standings['GF'] += goals_for
+    team_standings['GA'] += goals_against
+    team_standings['GD'] = team_standings['GF'] - team_standings['GA']
+    standings.update(team_standings)
+
+
+def view_standings():
+    calculate_standings()
+    with DatabaseManager('generic.db') as cursor:
+        cursor.execute('SELECT * FROM standings')
+        standings = cursor.fetchall()
+        df = pd.DataFrame(standings, columns=['Team', 'GP', 'W', 'L', 'Win %',
+                                              'GF', 'GA', 'GD'])
+        print(df)
 
