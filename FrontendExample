@@ -1,1 +1,118 @@
+## GUI Login Window ##
 
+class LoginApp:
+    def __init__(self, root, image_handler, on_login_success_callback):
+        self.root = root
+        self.image_handler = image_handler
+        self.on_login_success_callback = on_login_success_callback
+
+        self.root.title("TEXT")
+        self.root.geometry("600x450")
+        self.center_window(self.root)
+
+        self.banner_filename = "banner.png"
+        self.banner = self.image_handler.load_image(self.banner_filename, resize_to=(600, 100))
+
+        if self.banner:
+            banner_label = Label(self.root, image=self.banner)
+            banner_label.image = self.banner
+            banner_label.pack(pady=10)
+        else:
+            print("Failed to load the banner image.")
+
+        header_font = tkFont.Font(family="Verdana", size=12, weight="bold", underline=True)
+        additional_text = tk.Label(self.root, text="PAC-8 Statistics Database", font=header_font)
+        additional_text.pack(pady=5)
+
+        tk.Label(self.root, text="Username:").pack()
+        self.username_entry = tk.Entry(self.root)
+        self.username_entry.pack()
+
+        tk.Label(self.root, text="Password:").pack()
+        self.password_entry = tk.Entry(self.root, show="*")
+        self.password_entry.pack()
+
+        login_button = tk.Button(self.root, text="Login", command=self.login_validation)
+        login_button.pack()
+        
+        exit_button = Button(self.root, text="Exit", command=self.exit_application)
+        exit_button.pack(pady=10)
+
+    def exit_application(self):
+        self.root.quit()
+        self.root.destroy()
+        
+    def center_window(self, win):
+        win.update_idletasks()
+        width = win.winfo_width()
+        height = win.winfo_height()
+        x = (win.winfo_screenwidth() // 2) - (width // 2)
+        y = (win.winfo_screenheight() // 2) - (height // 2)
+        win.geometry(f'{width}x{height}+{x}+{y}')
+
+    def login_validation(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        if username == "***" and password == "***":
+            self.root.withdraw()
+            self.on_login_success_callback()
+
+#-------------------------------------------------------------------------------------------------------#
+
+## GUI Main Window ##
+
+class MainWindow:
+    def __init__(self, root, image_handler, show_schedule_callback):
+        self.root = root
+        self.image_handler = image_handler
+        self.show_schedule_callback = show_schedule_callback
+        self.images = self.preload_images()
+
+        self.root.title("TEXT")
+        self.root.geometry("800x600")
+        self.center_window(self.root)
+
+        self.banner = self.image_handler.load_banner("banner.png")
+        if self.banner:
+            banner_label = tk.Label(self.root, image=self.banner)
+            banner_label.pack(side="top", fill="x", pady=10)
+        else:
+            print("Failed to load banner image.")
+
+        self.setup_buttons()
+
+    def preload_images(self):
+        images = {}
+        for club_name, club_data in club_info.items():
+            logo_filename = club_data["logo"]
+            logo = self.image_handler.load_image(logo_filename, resize_to=(100, 100))
+            if logo:
+                images[club_name] = logo
+            else:
+                print(f"Failed to load image for {club_name}: {logo_filename}")
+        return images
+
+    def setup_buttons(self):
+        clubs_button = Button(self.root, text="Clubs", command=self.open_clubs_window)
+        clubs_button.pack(pady=10)
+
+        schedule_button = Button(self.root, text="Schedule", command=self.show_schedule_callback)
+        schedule_button.pack(pady=10)
+
+        exit_button = Button(self.root, text="Exit", command=self.exit_application)
+        exit_button.pack(pady=10)
+
+    def open_clubs_window(self):
+        ClubsWindow(self.root, self.image_handler, self.images)
+
+    def exit_application(self):
+        self.root.quit()
+        self.root.destroy()
+
+    def center_window(self, win):
+        win.update_idletasks()
+        width = win.winfo_width()
+        height = win.winfo_height()
+        x = (win.winfo_screenwidth() // 2) - (width // 2)
+        y = (win.winfo_screenheight() // 2) - (height // 2)
+        win.geometry(f'{width}x{height}+{x}+{y}')
