@@ -1,4 +1,4 @@
-## GUI Login Window ##
+##  Application Frontend Functionality Python Code  ##
 
 class LoginApp:
     def __init__(self, root, image_handler, on_login_success_callback):
@@ -57,9 +57,6 @@ class LoginApp:
             self.root.withdraw()
             self.on_login_success_callback()
 
-#-------------------------------------------------------------------------------------------------------#
-
-## GUI Main Window ##
 
 class MainWindow:
     def __init__(self, root, image_handler, show_schedule_callback):
