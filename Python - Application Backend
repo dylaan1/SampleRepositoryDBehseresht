@@ -1,4 +1,4 @@
-## Standings Calculation ##
+##  Standings Calculation Python Code  ##
 
 
 def calculate_standings():
@@ -45,69 +45,3 @@ def view_standings():
         df = pd.DataFrame(standings, columns=['Team', 'GP', 'W', 'L', 'Win %',
                                               'GF', 'GA', 'GD'])
         print(df)
-
-#--------------------------------------------------------------------------------------------#
-
-## External Database Connection ##
-
-
-
-def connect_db(db_name='generic.db'):
-    try:
-        conn = sqlite3.connect(db_name)
-        return conn
-    except sqlite3.Error as e:
-        print(f"Database connection error: {e}")
-        return None
-
-def fetch_one(query, params=()):
-    conn = connect_db()
-    if conn:
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        result = cursor.fetchone()
-        conn.close()
-        return result
-    else:
-        return None
-
-def fetch_all(query, params=()):
-    conn = connect_db()
-    if conn:
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        results = cursor.fetchall()
-        conn.close()
-        return results
-    else:
-        return []
-
-def execute_query(query, params=()):
-    conn = connect_db()
-    if conn:
-        cursor = conn.cursor()
-        cursor.execute(query, params)
-        conn.commit()
-        conn.close()
-
-def close_db(conn):
-    if conn:
-        conn.close()
-
-def show_db_info(db_name='generic.db'):
-    try:
-        conn = connect_db(db_name)
-        if conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-            tables = cursor.fetchall()
-            conn.close()
-
-            print(f"Currently connected to database: {db_name}")
-            print("Tables in the database:")
-            for table in tables:
-                print(f" - {table[0]}")
-        else:
-            print(f"Unable to connect to database: {db_name}")
-    except sqlite3.Error as e:
-        print(f"Error retrieving database information: {e}")
