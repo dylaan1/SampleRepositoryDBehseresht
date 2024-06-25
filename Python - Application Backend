@@ -1,4 +1,4 @@
-##  Standings Calculation Python Code  ##
+##  Application Backend Functionality Python Code  ##
 
 
 def calculate_standings():
