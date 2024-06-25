@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PAC-8 Hockey</title>
+    <title>League</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
@@ -47,7 +47,7 @@
         {% block content %}{% endblock %}
     </div>
     <footer>
-        <p>&copy; 2024 PAC-8 Hockey. All rights reserved.</p>
+        <p>&copy; 2024 League. All rights reserved.</p>
         <nav>
             <a href="{{ url_for('index') }}">Home</a> |
             <a href="{{ url_for('clubs') }}">Clubs</a> |
