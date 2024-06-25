@@ -1,0 +1,36 @@
+##  Interior Page HTML Code  ##
+
+
+{% extends "web_index.html" %}
+{% block content %}
+    <div class="club-detail" style="text-align: center; margin: 20px;">
+        <!-- Team Logo -->
+        <img src="{{ url_for('static', filename='images/' ~ club.logo) }}" alt="{{ club.name }} logo" style="width: 200px; height: auto; margin-bottom: 20px;">
+        
+        <!-- Team Name -->
+        <h1 style="font-size: 2em; font-weight: bold;">{{ club.name }}</h1>
+        
+        <!-- Team Information -->
+        <div style="font-size: 1em; margin: 20px 0;">
+            <p><strong>Year Joined:</strong> {{ club.year_joined }}</p>
+            <p><strong>Championships:</strong> {{ club.conference_championships }}</p>
+            <p><strong>Season Record:</strong> {{ club.current_season_record }}</p>
+            <p><strong>Overall Record:</strong> {{ club.overall_record }}</p>
+        </div>
+
+        <!-- Biography Section -->
+        <div style="text-align: left; margin: 0 auto; max-width: 800px;">
+            <h2 style="font-size: 1.5em; font-weight: bold; text-align: center;">About</h2>
+            <p>{{ club.biography }}</p>
+        </div>
+
+        <!-- Current Roster Section -->
+        <h2 style="font-size: 1.5em; font-weight: bold; text-align: center;">Current Roster</h2>
+        <ul style="list-style: none; padding: 0;">
+            {% for player in players %}
+            <li>{{ player.name }} - {{ player.position }} ({{ player.year }})</li>
+            <li>{{ player.stats }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
