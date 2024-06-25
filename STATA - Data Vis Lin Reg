@@ -1,7 +1,6 @@
 ##  Data Visualization of Linear Regression STATA Code  ##
 
 
-
 format Date %td
 
 
