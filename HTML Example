@@ -1,0 +1,59 @@
+##  HTML  ##
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PAC-8 Hockey</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">Clubs</a>
+                    <div class="dropdown-content">
+                        {% for club in active_clubs %}
+                        <a href="{{ url_for('club_detail', club_id=club.id) }}">
+                            <img src="{{ url_for('static', filename='images/' ~ club.logo) }}" alt="{{ club.name }} logo" class="logo-small">
+                            {{ club.name }}
+                        </a>
+                        {% endfor %}
+                        <a href="{{ url_for('previous_clubs') }}">Previous Clubs</a>
+                        <a href="{{ url_for('coaches_of_the_year') }}">Coaches of the Year</a>
+                    </div>
+                </li>
+                <li class="dropdown">
+                    <a href="#" class="dropbtn">Rosters</a>
+                    <div class="dropdown-content">
+                        <a href="{{ url_for('rosters') }}">League</a>
+                        {% for club in active_clubs %}
+                        <a href="{{ url_for('team_roster', club_id=club.id) }}">
+                            <img src="{{ url_for('static', filename='images/' ~ club.logo) }}" alt="{{ club.name }} logo" class="logo-small">
+                            {{ club.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </li>
+                <li><a href="#">Schedule</a></li>
+                <li><a href="#">Tournaments</a></li>
+                <li><a href="#">Recruitment</a></li>
+                <li><a href="#">Broadcasts</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+    <footer>
+        <p>&copy; 2024 PAC-8 Hockey. All rights reserved.</p>
+        <nav>
+            <a href="{{ url_for('index') }}">Home</a> |
+            <a href="{{ url_for('clubs') }}">Clubs</a> |
+            <a href="{{ url_for('rosters') }}">Rosters</a> |
+            <a href="#">Schedule</a>
+        </nav>
+    </footer>
+</body>
+</html>
