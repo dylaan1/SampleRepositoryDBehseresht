@@ -1,3 +1,6 @@
+##  Data Visualization of Confidence Intervals R Code  ##
+
+
 ###     107th Cohesion Plot and T-Test     ###
 HS107$Cohesion<-abs(HS107$yea-HS107$nay)/(HS107$yea+HS107$nay)
 plot(HS107$date2,HS107$Cohesion,pch=19,cex=.5,
