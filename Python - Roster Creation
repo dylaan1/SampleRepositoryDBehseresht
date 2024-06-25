@@ -1,0 +1,111 @@
+
+import pandas as pd
+from sys_databases import DatabaseManager
+from IPython.display import display
+
+TEAMS = [
+    'Team A', 'Team B', 'Team C', 'Team D',
+    'Team E', 'Team F', 'Team G', 'Team H'
+]
+
+POSITIONS = [
+    'F', 'D', 'G'
+]
+
+
+class RosterMoves:
+    def add_player():
+        first_name = input('First Name: ')
+        last_name = input('Last Name: ')
+        while True:
+            team = input(f'What team is {first_name} on: ')
+            if team in TEAMS:
+                break
+            else:
+                print('Please enter a valid team abbreviation.')
+        while True:
+            position = input(f'What position does {first_name} play: ')
+            if position in POSITIONS:
+                break
+            else:
+                print('Please enter a valid position.')
+        with DatabaseManager('generic.db') as cursor:
+            cursor.execute('''
+                INSERT INTO roster (
+                    first_name, last_name, team, position
+                ) VALUES (?, ?, ?, ?)
+            ''', (first_name, last_name, team, position))
+
+    def remove_player():
+        while True:
+            player_id = input("Enter the ID of the player to remove: ")
+            if player_id.isdigit() and int(player_id) > 0:
+                player_id = int(player_id)
+                break
+            else:
+                print("Invalid player ID.")
+        with DatabaseManager('generic.db') as cursor:
+            cursor.execute('''
+                DELETE FROM roster WHERE id = ?
+            ''', (player_id,))
+
+    def bulk_add_player_data(player_data):
+        with DatabaseManager('generic.db') as cursor:
+            for player in player_data:
+                if player['team'] in TEAMS and player['position'] in POSITIONS:
+                    cursor.execute('''
+                        INSERT INTO roster (
+                            first_name, last_name, team, position
+                        ) VALUES (?, ?, ?, ?)
+                    ''', (player['first_name'], player['last_name'],
+                          player['team'], player['position']))
+                else:
+                    print(f"Invalid data for player {player['first_name']} \
+                            {player['last_name']}")
+
+    def update_player_info():
+        while True:
+            player_id = input("Enter the ID of the player to update: ")
+            if player_id.isdigit() and int(player_id) > 0:
+                player_id = int(player_id)
+                break
+            else:
+                print("Invalid player ID.")
+        first_name = input('New First Name: ')
+        last_name = input('New Last Name: ')
+        while True:
+            team = input(f'What team is {first_name} now on: ')
+            if team in TEAMS:
+                break
+            else:
+                print('Please enter a valid team abbreviation.')
+        while True:
+            position = input(f'What position does {first_name} now play: ')
+            if position in POSITIONS:
+                break
+            else:
+                print('Please enter a valid position.')
+        with DatabaseManager('generic.db') as cursor:
+            cursor.execute('''
+                UPDATE roster
+                SET first_name = ?, last_name = ?, team = ?, position = ?
+                WHERE id = ?
+            ''', (first_name, last_name, team, position, player_id))
+
+
+class DisplayRoster:
+    def display_league_roster():
+        with DatabaseManager('generic.db') as cursor:
+            df = pd.read_sql_query('SELECT * FROM roster',
+                                   cursor.connection)
+            display(df)
+
+    def display_team_roster(team):
+        if team not in TEAMS:
+            print('Enter Team Abbreviation: ')
+            return
+        with DatabaseManager('generic.db') as cursor:
+            df = pd.read_sql_query('SELECT * FROM roster \
+                                    WHERE team = ?',
+                                   cursor.connection, params=(team,))
+            display(df)
