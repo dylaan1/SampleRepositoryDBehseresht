@@ -1,0 +1,78 @@
+##  Research using STATA  ##
+
+
+
+format Date %td
+
+
+* Generate before/after variable
+
+capture drop Before* Year Security After*
+gen Before911 = (Date < date("9/11/2001","MDY"))
+gen BeforeCovid = (Date < date("3/12/2020","MDY"))
+gen Year = year(Date)
+
+gen Security = Year < 2020
+
+gen Before = Before911 | (BeforeCovid & Year > 2018)
+gen AfterCrisis = 1-Before
+
+* clean up date
+	destring EXE, force replace
+	destring LEG, force replace
+	destring JUD, force replace
+	destring LGOV, force replace
+	destring DEM, force replace
+	destring REP, force replace
+	
+*PR Tests
+		
+	prtest EXE , by(AfterCrisis)
+
+	prtest EXE if Security==1, by(AfterCrisis)
+	prtest LEG if Security==1, by(AfterCrisis)
+	prtest JUD if Security==1, by(AfterCrisis)
+	prtest LGOV if Security==1, by(AfterCrisis)
+	prtest DEM if Security==1, by(AfterCrisis)
+	prtest REP if Security==1, by(AfterCrisis)
+
+table AfterCrisis, c(sd EXE sd LEG sd DEM sd REP )
+
+table AfterCrisis, c(mean EXE mean LEG mean DEM mean REP )
+
+*Graphs
+	twoway scatter EXE Date if Year == 2001, jitter(07)
+
+	ksm EXE Date if Year == 2001
+	ksm EXE Date if Year == 2020
+	
+	ksm LEG Date if Year == 2001
+	ksm LEG Date if Year == 2020
+	
+	ksm JUD Date if Year == 2001
+	ksm JUD Date if Year == 2020
+	
+	ksm LGOV Date if Year == 2001
+	ksm LGOV Date if Year == 2020
+	
+	ksm DEM Date if Year == 2001
+	ksm DEM Date if Year == 2020
+	
+	ksm REP Date if Year == 2001
+	ksm REP Date if Year == 2020
+
+
+* RCV
+	*clear
+	capture drop Date
+	gen Date = date(date,"MD20Y")
+	format Date %td
+	gen Cohesion = abs(yea_count - nay_count)/(yea_count+nay_count)
+	ksm Cohesion Date
+	
+	reg Cohesion Date
+	gen After911 = Date > date("09/11/2001","MDY")
+	xi:reg Cohesion i.After911*Date
+	gen DistanceTo911 = abs(date("09/11/2001","MDY")-Date)
+	
+	reg Cohesion After911 if DistanceTo911 < 100
