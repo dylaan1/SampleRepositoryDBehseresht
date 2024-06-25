@@ -1,0 +1,145 @@
+
+import re
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from sys_databases import DatabaseManager
+
+
+def return_playoff_teams():
+    with DatabaseManager('generic.db') as cursor:
+        cursor.execute(
+            'SELECT Team, Win %, GD, GF, GA FROM standings \
+            ORDER BY Win % DESC, GD DESC, GF DESC, GA ASC LIMIT 8')
+        teams = cursor.fetchall()
+        playoff_teams = pd.DataFrame(teams,
+                                     columns=['Team', 'Win %',
+                                              'GF', 'GA', 'GD'])
+        return playoff_teams
+
+
+class PlayoffRounds:
+    def generate_matchups(self, winners):
+        winner_indices = [self.playoff_teams.index[self.playoff_teams
+                          ['Team'] == winner].tolist()[0]
+                          for winner in winners]
+        winner_indices.sort()
+        matchups = [(self.playoff_teams.iloc[winner_indices[i]]['Team'],
+                     self.playoff_teams.iloc[winner_indices[i+1]]['Team'])
+                    for i in range(0, len(winner_indices), 2)]
+        return matchups
+
+    def quarterfinals_round(self, playoff_teams):
+        quarterfinals = [(playoff_teams.iloc[0]['Team'],
+                          playoff_teams.iloc[7]['Team']),
+                         (playoff_teams.iloc[1]['Team'],
+                          playoff_teams.iloc[6]['Team']),
+                         (playoff_teams.iloc[2]['Team'],
+                          playoff_teams.iloc[5]['Team']),
+                         (playoff_teams.iloc[3]['Team'],
+                          playoff_teams.iloc[4]['Team'])]
+        return quarterfinals
+
+    def semifinals_round(self, quarterfinals_winners):
+        return self.generate_matchups(quarterfinals_winners)
+
+    def championship_game(self, semifinals_winners):
+        return self.generate_matchups(semifinals_winners)
+
+
+class MatchDetails:
+    def input_match_info(self):
+        date_pattern = re.compile(r'\d{4}-\d{2}-\d{2}')
+        time_pattern = re.compile(r'\d{2}:\d{2}')
+        while True:
+            date = input("Enter match date (YYYY-MM-DD): ")
+            if date_pattern.fullmatch(date):
+                break
+            else:
+                print("Invalid date format.")
+        while True:
+            time = input("Enter match time (HH:MM): ")
+            if time_pattern.fullmatch(time):
+                break
+            else:
+                print("Invalid time format.")
+        venue = input("Enter venue: ")
+        return date, time, venue
+
+    def input_match_scores(self):
+        while True:
+            try:
+                home_score = int(input("Enter home team score: "))
+                away_score = int(input("Enter away team score: "))
+                if home_score >= 0 and away_score >= 0:
+                    break
+                else:
+                    print("Scores must be positive integers.")
+            except ValueError:
+                print("Scores must be integers.")
+        return home_score, away_score
+
+    def determine_winners(self, matchups_table):
+        winners = []
+        for i, row in matchups_table.iterrows():
+            if row['Home Score'] > row['Away Score']:
+                winners.append(row['Home Team'])
+            else:
+                winners.append(row['Away Team'])
+        return winners
+
+    def update_round(self, winners, round):
+        updated_round = []
+        for match in round:
+            if match[0] in winners:
+                updated_round.append(match)
+            else:
+                updated_round.append((match[1], match[0]))
+        return updated_round
+
+    def playoff_matchups(self, round, rounds, i, ax):
+        matchups = []
+        for j, match in enumerate(round):
+            home_team, away_team = match
+            date, time, venue = self.input_match_info()
+            home_score, away_score = self.input_match_scores()
+            matchups.append([date, time, away_team, away_score,
+                             home_team, home_score, venue])
+            line = Line2D([i, i+1],
+                          [len(rounds[0])-j,
+                           len(rounds[0])-rounds[i+1].index(match[0])],
+                          color='black')
+            ax.add_line(line)
+            ax.text(i, len(rounds[0])-j, f"{home_team} ({home_score})",
+                    horizontalalignment='right')
+            ax.text(i+1, len(rounds[0])-rounds[i+1].index(match[0]),
+                    f"{away_team} ({away_score})",
+                    horizontalalignment='left')
+        return matchups
+
+
+def generate_tournament():
+    playoff_teams = return_playoff_teams()
+    quarterfinals = PlayoffRounds().quarterfinals_round(playoff_teams)
+    semifinals = PlayoffRounds().semifinals_round(quarterfinals)
+    championship = PlayoffRounds().championship_game(semifinals)
+    rounds = [quarterfinals, semifinals, championship]
+    match_details = MatchDetails()
+    fig, ax = plt.subplots(figsize=(10, 10))
+    for i, round in enumerate(rounds[:-1]):
+        matchups_table = match_details.generate_playoff_matchups(
+            round, rounds, i, ax)
+        print(matchups_table)
+        winners = match_details.determine_winners(matchups_table)
+        rounds[i+1] = match_details.update_round(winners, rounds[i+1])
+    matchups_table = match_details.generate_playoff_matchups(
+        rounds[-1], rounds, len(rounds)-1, ax)
+    print(matchups_table)
+    ax.set_xlim(0, len(rounds))
+    ax.set_ylim(0, len(rounds[0])+1)
+    ax.set_xticks(range(len(rounds)))
+    ax.set_yticks(range(len(rounds[0])+1))
+    ax.set_xticklabels([f"Round {i+1}" for i in range(len(rounds))])
+    ax.set_yticklabels([f"Match {i+1}" for i in range(len(rounds[0])+1)])
+    plt.gca().invert_yaxis()
+    plt.show()
